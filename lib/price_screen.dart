@@ -1,6 +1,7 @@
 import 'package:bitcoin_ticker/coin_data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'dart:io' show Platform;
 
 class PriceScreen extends StatefulWidget {
   @override
@@ -11,8 +12,8 @@ class _PriceScreenState extends State<PriceScreen> {
   String selectedCurrency = 'USD';
   int selectedCurrencyIndex = 19;
 
-  List<DropdownMenuItem<String>> getDropdownItems() {
-    return currenciesList
+  DropdownButton<String> androidDropdown() {
+    List<DropdownMenuItem<String>> currencyItems = currenciesList
         .map(
           (e) => DropdownMenuItem(
             child: Text(e),
@@ -20,10 +21,31 @@ class _PriceScreenState extends State<PriceScreen> {
           ),
         )
         .toList();
+    return DropdownButton<String>(
+      value: selectedCurrency,
+      items: currencyItems,
+      onChanged: (value) {
+        setState(() {
+          selectedCurrency = value as String;
+        });
+      },
+    );
   }
 
-  List<Widget> getPickerItems() {
-    return currenciesList.map((currency) => Text(currency)).toList();
+  CupertinoPicker iOSPicker() {
+    List<Widget> pickerItems =
+        currenciesList.map((currency) => Text(currency)).toList();
+    return CupertinoPicker(
+      scrollController:
+          FixedExtentScrollController(initialItem: selectedCurrencyIndex),
+      backgroundColor: Colors.lightGreen,
+      itemExtent: 32,
+      onSelectedItemChanged: (selectedIndex) {
+        // print(selectedIndex);
+        selectedCurrencyIndex = selectedIndex;
+      },
+      children: pickerItems,
+    );
   }
 
   @override
@@ -62,33 +84,10 @@ class _PriceScreenState extends State<PriceScreen> {
             alignment: Alignment.center,
             padding: EdgeInsets.only(bottom: 30.0),
             color: Colors.lightGreen,
-            child: CupertinoPicker(
-              scrollController: FixedExtentScrollController(
-                  initialItem: selectedCurrencyIndex),
-              backgroundColor: Colors.lightGreen,
-              itemExtent: 32,
-              onSelectedItemChanged: (selectedIndex) {
-                // print(selectedIndex);
-                selectedCurrencyIndex = selectedIndex;
-              },
-              children: getPickerItems(),
-              // [
-              //   Text('USD'),
-              // ]
-            ),
+            child: Platform.isIOS ? iOSPicker() : androidDropdown(),
           ),
         ],
       ),
     );
   }
 }
-
-// DropdownButton<String>(
-// value: selectedCurrency,
-// items: getDropdownItems(),
-// onChanged: (value) {
-// setState(() {
-// selectedCurrency = value as String;
-// });
-// },
-// ),
