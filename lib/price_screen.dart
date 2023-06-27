@@ -11,6 +11,8 @@ class PriceScreen extends StatefulWidget {
 class _PriceScreenState extends State<PriceScreen> {
   String selectedCurrency = 'USD';
   int selectedCurrencyIndex = 19;
+  String rate = '?';
+  CoinData coinData = CoinData();
 
   DropdownButton<String> androidDropdown() {
     List<DropdownMenuItem<String>> currencyItems = currenciesList
@@ -68,12 +70,21 @@ class _PriceScreenState extends State<PriceScreen> {
               ),
               child: Padding(
                 padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 28.0),
-                child: Text(
-                  '1 BTC = ? USD',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 20.0,
-                    color: Colors.white,
+                child: GestureDetector(
+                  onTap: () async {
+                    var data = await coinData.getCoinData();
+                    var rateString = data['rate'].toInt().toString();
+                    setState(() {
+                      rate = rateString;
+                    });
+                  },
+                  child: Text(
+                    '1 BTC = $rate USD',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 20.0,
+                      color: Colors.white,
+                    ),
                   ),
                 ),
               ),
