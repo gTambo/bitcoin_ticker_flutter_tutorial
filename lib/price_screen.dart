@@ -12,7 +12,6 @@ class _PriceScreenState extends State<PriceScreen> {
   String selectedCurrency = 'USD';
   int selectedCurrencyIndex = 19;
   String rate = '?';
-  CoinData coinData = CoinData();
 
   DropdownButton<String> androidDropdown() {
     List<DropdownMenuItem<String>> currencyItems = currenciesList
@@ -43,8 +42,9 @@ class _PriceScreenState extends State<PriceScreen> {
       backgroundColor: Colors.lightGreen,
       itemExtent: 32,
       onSelectedItemChanged: (selectedIndex) {
-        // print(selectedIndex);
-        selectedCurrencyIndex = selectedIndex;
+        setState(() {
+          selectedCurrencyIndex = selectedIndex;
+        });
       },
       children: pickerItems,
     );
@@ -72,14 +72,17 @@ class _PriceScreenState extends State<PriceScreen> {
                 padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 28.0),
                 child: GestureDetector(
                   onTap: () async {
+                    var newCurrency = currenciesList[selectedCurrencyIndex];
+                    CoinData coinData = CoinData(newCurrency);
                     var data = await coinData.getCoinData();
                     var rateString = data['rate'].toInt().toString();
                     setState(() {
+                      selectedCurrency = newCurrency;
                       rate = rateString;
                     });
                   },
                   child: Text(
-                    '1 BTC = $rate USD',
+                    '1 BTC = $rate $selectedCurrency',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 20.0,
