@@ -47,6 +47,8 @@ class CoinData {
     } else {
       print('request failed with status ${response.statusCode}');
       print(response.body);
+      Map<String, double> unknownRate = {'rate': 0.00};
+      return unknownRate;
     }
   }
 }
