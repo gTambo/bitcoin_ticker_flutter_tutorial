@@ -11,12 +11,14 @@ class PriceScreen extends StatefulWidget {
 class _PriceScreenState extends State<PriceScreen> {
   String selectedCurrency = 'USD';
   int selectedCurrencyIndex = 19;
+  List<String> currenciesPerCard = [];
   List<String> ratesByType = [];
   String rate = '?';
   int cryptoTypeIndex = 0;
-  void setRates() {
+  void setRatesAndCurrencies() {
     for (String type in cryptoList) {
       ratesByType.add(rate);
+      currenciesPerCard.add(selectedCurrency);
       print(type);
     }
   }
@@ -62,12 +64,12 @@ class _PriceScreenState extends State<PriceScreen> {
   void initState() {
     super.initState();
     // updateTickerCards();
-    // setRates();
+    // setRatesAndCurrencies();
   }
 
   @override
   Widget build(BuildContext context) {
-    setRates();
+    setRatesAndCurrencies();
     return Scaffold(
       appBar: AppBar(
         title: Text('🤑 Coin Ticker'),
@@ -150,7 +152,7 @@ class _PriceScreenState extends State<PriceScreen> {
                 child: GestureDetector(
                   onTap: () => onTapFunction(type, rateKey),
                   child: Text(
-                    '1 $type = ${ratesByType[rateKey]} $selectedCurrency',
+                    '1 $type = ${ratesByType[rateKey]} ${currenciesPerCard[rateKey]}',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 20.0,
@@ -174,6 +176,7 @@ class _PriceScreenState extends State<PriceScreen> {
     var rateString = data['rate'].toInt().toString();
     setState(() {
       selectedCurrency = newCurrency;
+      currenciesPerCard[rateKey] = newCurrency;
       ratesByType[rateKey] = rateString;
     });
   }
