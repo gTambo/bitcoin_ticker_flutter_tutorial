@@ -11,7 +11,15 @@ class PriceScreen extends StatefulWidget {
 class _PriceScreenState extends State<PriceScreen> {
   String selectedCurrency = 'USD';
   int selectedCurrencyIndex = 19;
+  List<String> ratesByType = [];
   String rate = '?';
+  int cryptoTypeIndex = 0;
+  void setRates() {
+    for (String type in cryptoList) {
+      ratesByType.add(rate);
+      print(type);
+    }
+  }
 
   DropdownButton<String> androidDropdown() {
     List<DropdownMenuItem<String>> currencyItems = currenciesList
@@ -51,7 +59,15 @@ class _PriceScreenState extends State<PriceScreen> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    // updateTickerCards();
+    // setRates();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    setRates();
     return Scaffold(
       appBar: AppBar(
         title: Text('🤑 Coin Ticker'),
@@ -62,35 +78,44 @@ class _PriceScreenState extends State<PriceScreen> {
         children: <Widget>[
           Padding(
             padding: EdgeInsets.fromLTRB(18.0, 18.0, 18.0, 0),
-            child: Card(
-              color: Colors.lightGreen,
-              elevation: 5.0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10.0),
-              ),
-              child: Padding(
-                padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 28.0),
-                child: GestureDetector(
-                  onTap: () async {
-                    var newCurrency = currenciesList[selectedCurrencyIndex];
-                    CoinData coinData = CoinData(newCurrency);
-                    var data = await coinData.getCoinData();
-                    var rateString = data['rate'].toInt().toString();
-                    setState(() {
-                      selectedCurrency = newCurrency;
-                      rate = rateString;
-                    });
-                  },
-                  child: Text(
-                    '1 BTC = $rate $selectedCurrency',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 20.0,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-              ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: buildCryptoCardList(
+                  cryptoTypesList: cryptoList, onTapFunction: updateTickerCard),
+              // SizedBox(
+              //   height: 10,
+              // ),
+              // Card(
+              //   color: Colors.lightGreen,
+              //   elevation: 5.0,
+              //   shape: RoundedRectangleBorder(
+              //     borderRadius: BorderRadius.circular(10.0),
+              //   ),
+              //   child: Padding(
+              //     padding:
+              //         EdgeInsets.symmetric(vertical: 15.0, horizontal: 28.0),
+              //     child: GestureDetector(
+              //       onTap: () async {
+              //         var newCurrency = currenciesList[selectedCurrencyIndex];
+              //         CoinData coinData = CoinData(newCurrency);
+              //         var data = await coinData.getCoinData();
+              //         var rateString = data['rate'].toInt().toString();
+              //         setState(() {
+              //           selectedCurrency = newCurrency;
+              //           rate = rateString;
+              //         });
+              //       },
+              //       child: Text(
+              //         '1 BTC = $rate $selectedCurrency',
+              //         textAlign: TextAlign.center,
+              //         style: TextStyle(
+              //           fontSize: 20.0,
+              //           color: Colors.white,
+              //         ),
+              //       ),
+              //     ),
+              //   ),
+              // ),
             ),
           ),
           Container(
@@ -103,5 +128,53 @@ class _PriceScreenState extends State<PriceScreen> {
         ],
       ),
     );
+  }
+
+  List<Widget> buildCryptoCardList(
+      {required cryptoTypesList, required onTapFunction}) {
+    List<Widget> cryptoTypesList = cryptoList
+        .asMap()
+        .entries
+        .map(
+          (cryptoType) => Builder(builder: (context) {
+            int rateKey = cryptoType.key;
+            String type = cryptoType.value;
+            return Card(
+              color: Colors.lightGreen,
+              elevation: 5.0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10.0),
+              ),
+              child: Padding(
+                padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 28.0),
+                child: GestureDetector(
+                  onTap: () => onTapFunction(type, rateKey),
+                  child: Text(
+                    '1 $type = ${ratesByType[rateKey]} $selectedCurrency',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 20.0,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+            );
+          }),
+        )
+        .toList();
+    return cryptoTypesList;
+  }
+
+  void updateTickerCard(String inheritedCryptoType, int rateKey) async {
+    var newCurrency = currenciesList[selectedCurrencyIndex];
+    CoinData coinData =
+        CoinData(currency: newCurrency, cryptoType: inheritedCryptoType);
+    var data = await coinData.getCoinData();
+    var rateString = data['rate'].toInt().toString();
+    setState(() {
+      selectedCurrency = newCurrency;
+      ratesByType[rateKey] = rateString;
+    });
   }
 }
