@@ -13,13 +13,11 @@ class _PriceScreenState extends State<PriceScreen> {
   int selectedCurrencyIndex = 19;
   List<String> currenciesPerCard = [];
   List<String> ratesByType = [];
-  String rate = '?';
   int cryptoTypeIndex = 0;
   void setRatesAndCurrencies() {
     for (String type in cryptoList) {
-      ratesByType.add(rate);
+      ratesByType.add('?');
       currenciesPerCard.add(selectedCurrency);
-      print(type);
     }
   }
 
@@ -63,8 +61,7 @@ class _PriceScreenState extends State<PriceScreen> {
   @override
   void initState() {
     super.initState();
-    // updateTickerCards();
-    // setRatesAndCurrencies();
+    updateAllCards();
   }
 
   @override
@@ -84,40 +81,23 @@ class _PriceScreenState extends State<PriceScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: buildCryptoCardList(
                   cryptoTypesList: cryptoList, onTapFunction: updateTickerCard),
-              // SizedBox(
-              //   height: 10,
-              // ),
-              // Card(
-              //   color: Colors.lightGreen,
-              //   elevation: 5.0,
-              //   shape: RoundedRectangleBorder(
-              //     borderRadius: BorderRadius.circular(10.0),
-              //   ),
-              //   child: Padding(
-              //     padding:
-              //         EdgeInsets.symmetric(vertical: 15.0, horizontal: 28.0),
-              //     child: GestureDetector(
-              //       onTap: () async {
-              //         var newCurrency = currenciesList[selectedCurrencyIndex];
-              //         CoinData coinData = CoinData(newCurrency);
-              //         var data = await coinData.getCoinData();
-              //         var rateString = data['rate'].toInt().toString();
-              //         setState(() {
-              //           selectedCurrency = newCurrency;
-              //           rate = rateString;
-              //         });
-              //       },
-              //       child: Text(
-              //         '1 BTC = $rate $selectedCurrency',
-              //         textAlign: TextAlign.center,
-              //         style: TextStyle(
-              //           fontSize: 20.0,
-              //           color: Colors.white,
-              //         ),
-              //       ),
-              //     ),
-              //   ),
-              // ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 18),
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,
+                  elevation: 6,
+                  padding: EdgeInsets.all(20),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  )),
+              onPressed: updateAllCards,
+              child: Text(
+                'Update All',
+                style: TextStyle(fontSize: 20),
+              ),
             ),
           ),
           Container(
@@ -147,10 +127,12 @@ class _PriceScreenState extends State<PriceScreen> {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10.0),
               ),
+              margin: EdgeInsets.only(bottom: 25),
               child: Padding(
-                padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 28.0),
+                padding: EdgeInsets.symmetric(vertical: 25.0, horizontal: 28.0),
                 child: GestureDetector(
-                  onTap: () => onTapFunction(type, rateKey),
+                  onTap: () => onTapFunction(
+                      inheritedCryptoType: type, rateKey: rateKey),
                   child: Text(
                     '1 $type = ${ratesByType[rateKey]} ${currenciesPerCard[rateKey]}',
                     textAlign: TextAlign.center,
@@ -168,7 +150,8 @@ class _PriceScreenState extends State<PriceScreen> {
     return cryptoTypesList;
   }
 
-  void updateTickerCard(String inheritedCryptoType, int rateKey) async {
+  void updateTickerCard(
+      {required String inheritedCryptoType, required int rateKey}) async {
     var newCurrency = currenciesList[selectedCurrencyIndex];
     CoinData coinData =
         CoinData(currency: newCurrency, cryptoType: inheritedCryptoType);
@@ -179,5 +162,13 @@ class _PriceScreenState extends State<PriceScreen> {
       currenciesPerCard[rateKey] = newCurrency;
       ratesByType[rateKey] = rateString;
     });
+  }
+
+  void updateAllCards() async {
+    int idx = 0;
+    for (var coin in cryptoList) {
+      updateTickerCard(inheritedCryptoType: coin, rateKey: idx);
+      idx++;
+    }
   }
 }
